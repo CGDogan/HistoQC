@@ -104,7 +104,7 @@ class BFBridgeThread:
         lib.bfbridge_free_library(self.bfbridge_library)
         print("destroyinged BFBridgeThread")
 
-# One instance can be used with the library object it was constructed with
+# An instance can be used with only the library object it was constructed with
 class BFBridgeInstance:
     def __init__(self, bfbridge_thread):
         if bfbridge_thread is None:
@@ -167,6 +167,10 @@ class BFBridgeInstance:
         res = lib.bf_open(self.bfbridge_instance, self.bfbridge_library, filepath, filepathlen)
         return res
     
+    def get_format(self):
+        length = lib.bf_get_format(self.bfbridge_instance, self.bfbridge_library)
+        return self.__return_from_buffer(length, True)
+
     def close(self):
         return lib.bf_close(self.bfbridge_instance, self.bfbridge_library)
 
@@ -199,6 +203,9 @@ class BFBridgeInstance:
 
     def get_effective_size_c(self):
         return lib.bf_get_effective_size_c(self.bfbridge_instance, self.bfbridge_library)
+
+    def get_image_count(self):
+        return lib.bf_get_image_count(self.bfbridge_instance, self.bfbridge_library)
 
     def get_dimension_order(self):
         length = lib.bf_get_dimension_order(self.bfbridge_instance, self.bfbridge_library)
