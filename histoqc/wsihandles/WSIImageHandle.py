@@ -4,7 +4,8 @@ import logging
 
 WSI_HANDLES = {
     "openslide" : "histoqc.wsihandles.OpenSlideHandle",
-    "wsidicom" : "histoqc.wsihandles.DicomHandle"
+    "wsidicom" : "histoqc.wsihandles.DicomHandle",
+    "bfbridge" : "histoqc.wsihandles.BioFormatsHandle",
 }
 
 class WSIImageHandle(ABC):
