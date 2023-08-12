@@ -218,7 +218,12 @@ bfbridge_error_t *bfbridge_make_library(
     if (code < 0)
     {
         free_string(path_arg);
-        return make_error((bfbridge_error_code_t)code, "JNI_CreateJavaVM failed, please see https://docs.oracle.com/en/java/javase/20/docs/specs/jni/functions.html#return-codes for error code description", NULL);
+        char code_string[2] = {-code + '0', 0};
+        if (code > 9) {
+            // Only supports 1 digit now.
+            code_string[0] = 0;
+        }
+        return make_error((bfbridge_error_code_t)code, "JNI_CreateJavaVM failed, please see https://docs.oracle.com/en/java/javase/20/docs/specs/jni/functions.html#return-codes for error code description: -", code_string);
     }
 
     jclass bfbridge_base = BFENVA(env, FindClass, "org/camicroscope/BFBridge");
@@ -309,6 +314,7 @@ bfbridge_error_t *bfbridge_make_library(
     prepare_method_id(BFGet8BitLookupTable, "()I");
     prepare_method_id(BFGet16BitLookupTable, "()I");
     prepare_method_id(BFOpenBytes, "(IIIII)I");
+    prepare_method_id(BFOpenThumbBytes, "(III)I");
     prepare_method_id(BFGetMPPX, "(I)D");
     prepare_method_id(BFGetMPPY, "(I)D");
     prepare_method_id(BFGetMPPZ, "(I)D");
@@ -739,6 +745,13 @@ int bf_open_bytes(
     int plane, int x, int y, int w, int h)
 {
     return BFFUNC(BFOpenBytes, Int, plane, x, y, w, h);
+}
+
+int bf_open_thumb_bytes(
+    bfbridge_instance_t *instance, bfbridge_library_t *library,
+    int plane, int w, int h)
+{
+    return BFFUNC(BFOpenThumbBytes, Int, plane, w, h);
 }
 
 double bf_get_mpp_x(
