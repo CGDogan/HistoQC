@@ -258,17 +258,25 @@ bfbridge_error_t *bfbridge_make_library(
         return make_error(BFBRIDGE_METHOD_NOT_FOUND, "Could not find BFBridge constructor", NULL);
     }
 
+    char *method_cannot_be_found = NULL;
+
     // Now do the same for methods but in shorthand form
 #define prepare_method_id(name, descriptor)                         \
     dest->name =                                                    \
         BFENVA(env, GetMethodID, bfbridge_base, #name, descriptor); \
     if (!dest->name)                                                \
     {                                                               \
-        BFENVAV(jvm, DestroyJavaVM);                                 \
-        return make_error(                                          \
-            BFBRIDGE_METHOD_NOT_FOUND,                              \
-            "Could not find BFBridge method ",                      \
-            #name ". Maybe check and update the descriptor?");      \
+        method_cannot_be_found = #name;                             \
+        goto prepare_method_error;                                  \
+    }
+
+    if (0) {
+    prepare_method_error:
+        BFENVAV(jvm, DestroyJavaVM);
+        return make_error(
+            BFBRIDGE_METHOD_NOT_FOUND,                              
+            "Please check and update the method and/or the descriptor, as it could not be found, for the method: ",                      
+            method_cannot_be_found);
     }
 
     // To print descriptors (encoded function types) to screen

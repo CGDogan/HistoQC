@@ -144,7 +144,11 @@ class BFBridgeThread:
             print("Please set BFBRIDGE_CLASSPATH to a single dir containing the jar files")
             sys.exit(1)
         cpdir_arg = ffi.new("char[]", cpdir.encode())
-        potential_error = lib.bfbridge_make_library(self.bfbridge_library, cpdir_arg, ffi.NULL)
+        cachedir = os.environ.get("BFBRIDGE_CLASSPATH")
+        cachedir_arg = ffi.NULL
+        if cachedir is not None and cachedir != "":
+            cachedir_arg = ffi.new("char[]", cachedir.encode())
+        potential_error = lib.bfbridge_make_library(self.bfbridge_library, cpdir_arg, cachedir_arg)
         if potential_error != ffi.NULL:
             print(ffi.string(potential_error[0].description))
             sys.exit(1)
@@ -333,9 +337,15 @@ class BFBridgeInstance:
         w = min(max_w, round(max_h * x_over_y));
         h = min(max_h, round(max_w * y_over_x));
         byte_arr = self.open_thumb_bytes(plane, w, h)
+
+        # Thumbnails can't be signed int in BioFormats
+        pixel_type = self.get_pixel_type()
+        if pixel_type == 0 or pixel_type == 2 or pixel_type == 4:
+            pixel_type += 1
+
         return make_pil_image( \
             byte_arr, w, h, self.get_rgb_channel_count(), \
-            False, self.get_pixel_type(), \
+            self.is_interleaved(), pixel_type, \
             self.is_little_endian())
 
     def get_mpp_x(self, no):
